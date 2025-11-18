@@ -1,0 +1,44 @@
+{
+  "name": "cold-wallet-project",
+  "version": "1.0.0",
+  "description": "Implementación de una cartera fría de criptomonedas",
+  "main": "index.js",
+  "scripts": {
+    "start":"electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cryptocurrency",
+    "wallet",
+    "cold-wallet",
+    "ed25519",
+    "argon2",
+    "aes-gcm",
+    "blockchain",
+    "electron",
+    "gui"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlePG1/Cold-Wallet-Project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "argon2": "^0.40.1",
+    "fast-json-stable-stringify": "^2.1.0",
+    "js-sha3": "^0.9.3",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AlePG1/Cold-Wallet-Project/issues"
+  },
+  "homepage": "https://github.com/AlePG1/Cold-Wallet-Project#readme"
+}
