@@ -34,4 +34,17 @@ function signTransaction(txObject, privateKey, publicKey) {
     };
 }
 
-module.exports = { signTransaction };
+// Funcion para verificar transaccion
+function verifyTransaction(signedTx) {
+  const { tx, signature_b64, pubkey_b64 } = signedTx;
+  
+  const txBytes = Buffer.from(canonicalizer(tx), 'utf8');
+  const signature = Buffer.from(signature_b64, 'base64');
+  const publicKey = Buffer.from(pubkey_b64, 'base64');
+
+  const isValid = nacl.sign.detached.verify(txBytes, signature, publicKey);
+  
+  if (isValid) return { valid: true };
+  return { valid: false, reason: 'Firma inválida' };
+}
+module.exports = { signTransaction, verifyTransaction };
