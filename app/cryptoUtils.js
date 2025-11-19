@@ -14,13 +14,13 @@ function deriveAddress(pubKeyBytes) {
 
   // Cálculo del hash KECCAK-256 (estándar de Ethereum).
   const hash = keccak256(pubKeyBuffer);
-  const hashBuffer = Buffer.from(hash, 'hext');
+  const hashBuffer = Buffer.from(hash, 'hex');
 
   // La dirección se obtiene tomando los últimos 20 bytes del hash.
   const addressBytes = hashBuffer.slice(-20);
 
   // Formato de la dirección como cadena hexadecimal con prefijo "0x".
-  const address = '0x' + addressBytes.toString('hex')
+  const address = '0x' + addressBytes.toString('hex');
 
   return address;
 }
