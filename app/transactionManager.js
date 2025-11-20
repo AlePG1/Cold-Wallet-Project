@@ -36,21 +36,21 @@ function signTransaction(txObject, privateKey, publicKey) {
 
 // Funcion para verificar transaccion
 function verifyTransaction(signedTx) {
-  const { tx, signature_b64, pubkey_b64 } = signedTx;
-  
-  const txBytes = Buffer.from(canonicalizer(tx), 'utf8');
-  const signature = Buffer.from(signature_b64, 'base64');
-  const publicKey = Buffer.from(pubkey_b64, 'base64');
-
-  const isValid = nacl.sign.detached.verify(txBytes, signature, publicKey);
-  
-  if (!isValid) return { valid: false, reason: 'Firma inválida' };
-
-  const expectedFrom = deriveAddress(publicKey);
-  if(tx.from !== expectedFrom){
-    return{valid: false, reason:"discrepancia de dirección (spoofing)"};
+  try {
+    const { tx, sig_scheme, signature_b64, pubkey_b64 } = signedTx;
+    if (sig_scheme !== 'Ed25519') return { valid: false, reason: 'Esquema de firma no soportado' };
+    const txBytes = Buffer.from(canonicalizer(tx), 'utf8');
+    const signature = Buffer.from(signature_b64, 'base64');
+    const publicKey = Buffer.from(pubkey_b64, 'base64');
+    if (!nacl.sign.detached.verify(txBytes, signature, publicKey)) return { valid: false, reason: 'Firma inválida' };
+    const expectedFrom = deriveAddress(publicKey);
+    if (tx.from !== expectedFrom) return { valid: false, reason: 'Discrepancia de dirección (tx.from no coincide con pubkey)' };
+    const senderNonces = nonceTracker[tx.from] || [];
+    if (senderNonces.includes(parseInt(tx.nonce, 10))) return { valid: false, reason: 'Nonce obsoleto o ya utilizado (Ataque de Repetición)' };
+    return { valid: true };
+  } catch (err) {
+    return { valid: false, reason: `Error interno: ${err.message}` };
   }
-  return{valid: true};
 }
 
 
