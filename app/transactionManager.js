@@ -1,10 +1,10 @@
 const nacl = require('tweetnacl');
-
+const stableStringify = require('fast-json-stable-stringify');
 const { deriveAddress } = require('./cryptoUtils');
 
 // Convertir transaccion a texto
 function canonicalizer(tx) {
-    return JSON.stringify(tx); 
+    return stableStringify(tx);
 }
 
 // Funcion para firmar
@@ -47,4 +47,5 @@ function verifyTransaction(signedTx) {
   if (isValid) return { valid: true };
   return { valid: false, reason: 'Firma inválida' };
 }
-module.exports = { signTransaction, verifyTransaction };
+
+module.exports = { signTransaction, verifyTransaction, canonicalizer };
