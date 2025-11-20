@@ -7,11 +7,11 @@ const { deriveAddress } = require('./cryptoUtils');
 
 const KEYSTORES_DIR = path.join(__dirname, '../keystores');
 const ACCOUNTS_FILE = path.join(__dirname, '../accounts.json');
-const KDF_PARAMS = { timeCost: 3, memoryCost: 65536, parallelism: 4, type: argon2.argon }
+const KDF_PARAMS = { timeCost: 3, memoryCost: 65536, parallelism: 4, type: argon2.argon2id }
 
 function ensureKeystoresDir() {
   if (!fs.existsSync(KEYSTORES_DIR)) fs.mkdirSync(KEYSTORES_DIR, { recursive: true });
-  if (!fs.existsSync(ACCOUNTS_FILE)) fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify({}));
+  if (!fs.existsSync(ACCOUNTS_FILE)) fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify({accounts: []},null, 2));
 }
 
 function getAccounts() {
@@ -22,6 +22,7 @@ return JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
 async function createKeystore(accountName, password) {
   ensureKeystoresDir();
   const accounts = getAccounts();
+  if(accounts.accounts.find(a =>a.name === accountName)) throw new Error('Ya existe una cuenta con ese nombre');
   const keyPair = nacl.sign.keyPair();
   const salt = crypto.randomBytes(16);
   const nonce = crypto.randomBytes(12);
@@ -54,6 +55,8 @@ async function createKeystore(accountName, password) {
   });
   
   fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accounts, null, 2));
+  kek.fill(0);
+  keyPair.secretKey.fill(0);
   
   return { address: accounts.accounts[accounts.accounts.length - 1].address, pubKey: keystoreData.pubkey_b64 };
 }
@@ -76,16 +79,31 @@ try {
   decipher.setAuthTag(authTag);
   decryptedKey = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
   } catch (err) {
-  // 
+  kek.fill(0);
   throw new Error('Contraseña incorrecta o keystore corrupto');
   }
+  kek.fill(0);
 
-  // ERROR INTENCIONAL: No limpia 'kek' al finalizar
   return { 
     privKey: new Uint8Array(decryptedKey), 
-    pubKey: new Uint8Array(Buffer.from(data.publicKey_b64, 'base64')) 
+    pubKey: new Uint8Array(Buffer.from(data.pubkey_b64, 'base64')) 
   };
 
 }
 
-module.exports = { ensureKeystoresDir, getAccounts, createKeystore, loadPrivateKey }
+function deleteAccount(keystoreId) {
+    const accounts = getAccounts();
+    const keystorePath = path.join(KEYSTORES_DIR, `${keystoreId}.json`);
+
+    if (fs.existsSync(keystorePath)) {
+        fs.unlinkSync(keystorePath);
+    }
+
+    const newAccountsList = accounts.accounts.filter(a => a.id !== keystoreId);
+    accounts.accounts = newAccountsList;
+
+    fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accounts, null, 2));
+    return true;
+}
+
+module.exports = { ensureKeystoresDir, getAccounts, createKeystore, loadPrivateKey, deleteAccount }
