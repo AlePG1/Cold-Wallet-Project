@@ -2,40 +2,30 @@ const nacl = require('tweetnacl');
 const stableStringify = require('fast-json-stable-stringify');
 const { deriveAddress } = require('./cryptoUtils');
 
-// Convertimos transaccion a texto
 function canonicalizer(tx) {
-    return stableStringify(tx);
+  return stableStringify(tx);
 }
 
-// Funcion para firmar
 function signTransaction(txObject, privateKey, publicKey) {
-    // objeto de la transaccion 
-    const fullTx = {
-        from: deriveAddress(publicKey), // se calcula desde la llave publica
-        to: txObject.to,
-        value: txObject.value,
-        nonce: txObject.nonce,
-        data_hex: txObject.data_hex || null,
-        timestamp: new Date().toISOString(),
-    };
-
-    // Convierte el texto a Bytes para poder firmarlo
-    const txBytes = Buffer.from(canonicalizer(fullTx), 'utf8');
-
-    // Firmamos usando la librería TweetNaCl (Algoritmo Ed25519)
-    const signature = nacl.sign.detached(txBytes, privateKey);
-
-    // Retornamos el paquete con la firma y la llave pública
-    return {
-        tx: fullTx,
-        sig_scheme: 'Ed25519',
-        signature_b64: Buffer.from(signature).toString('base64'),
-        pubkey_b64: Buffer.from(publicKey).toString('base64'),
-    };
+  const fullTx = {
+    from: deriveAddress(publicKey),
+    to: txObject.to,
+    value: txObject.value,
+    nonce: txObject.nonce,
+    data_hex: txObject.data_hex || null,
+    timestamp: new Date().toISOString(),
+  };
+  const txBytes = Buffer.from(canonicalizer(fullTx), 'utf8');
+  const signature = nacl.sign.detached(txBytes, privateKey);
+  return {
+    tx: fullTx,
+    sig_scheme: 'Ed25519',
+    signature_b64: Buffer.from(signature).toString('base64'),
+    pubkey_b64: Buffer.from(publicKey).toString('base64'),
+  };
 }
 
-// Funcion para verificar transaccion
-function verifyTransaction(signedTx) {
+function verifyTransaction(signedTx, nonceTracker) {
   try {
     const { tx, sig_scheme, signature_b64, pubkey_b64 } = signedTx;
     if (sig_scheme !== 'Ed25519') return { valid: false, reason: 'Esquema de firma no soportado' };
@@ -52,6 +42,5 @@ function verifyTransaction(signedTx) {
     return { valid: false, reason: `Error interno: ${err.message}` };
   }
 }
-
 
 module.exports = { signTransaction, verifyTransaction, canonicalizer };
