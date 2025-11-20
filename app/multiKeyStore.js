@@ -7,30 +7,27 @@ const { deriveAddress } = require('./cryptoUtils');
 
 const KEYSTORES_DIR = path.join(__dirname, '../keystores');
 const ACCOUNTS_FILE = path.join(__dirname, '../accounts.json');
-const KDF_PARAMS = { timeCost: 3, memoryCost: 65536, parallelism: 4, type: argon2.argon2id, hashLength: 32 };
+const KDF_PARAMS = { timeCost: 3, memoryCost: 65536, parallelism: 4, type: argon2.argon }
 
 function ensureKeystoresDir() {
   if (!fs.existsSync(KEYSTORES_DIR)) fs.mkdirSync(KEYSTORES_DIR, { recursive: true });
-  if (!fs.existsSync(ACCOUNTS_FILE)) fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify({ accounts: [] }));
+  if (!fs.existsSync(ACCOUNTS_FILE)) fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify({}));
 }
 
 function getAccounts() {
-  ensureKeystoresDir();
-  return JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
+ensureKeystoresDir();
+return JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
 }
 
 async function createKeystore(accountName, password) {
   ensureKeystoresDir();
   const accounts = getAccounts();
-
-  
   const keyPair = nacl.sign.keyPair();
   const salt = crypto.randomBytes(16);
   const nonce = crypto.randomBytes(12);
   const kek = await argon2.hash(password, { ...KDF_PARAMS, salt, raw: true });
   const cipher = crypto.createCipheriv('aes-256-gcm', kek, nonce);
   let ciphertext = Buffer.concat([cipher.update(Buffer.from(keyPair.secretKey)), cipher.final()]);
-  
   const keystoreId = crypto.randomBytes(16).toString('hex');
   
   const keystoreData = {
@@ -61,4 +58,34 @@ async function createKeystore(accountName, password) {
   return { address: accounts.accounts[accounts.accounts.length - 1].address, pubKey: keystoreData.pubkey_b64 };
 }
 
-module.exports = { ensureKeystoresDir, getAccounts, createKeystore };
+async function loadPrivateKey(keystoreId, password) {
+const keystorePath = path.join(KEYSTORES_DIR, `${keystoreId}.json`);
+if (!fs.existsSync(keystorePath)) throw new Error('Keystore no encontrado');
+
+const data = JSON.parse(fs.readFileSync(keystorePath, 'utf8'));
+const salt = Buffer.from(data.kdf_params.salt_b64, 'base64');
+const nonce = Buffer.from(data.cipher_params.nonce_b64, 'base64');
+const ciphertext = Buffer.from(data.ciphertext_b64, 'base64');
+const authTag = Buffer.from(data.tag_b64, 'base64');
+
+const kek = await argon2.hash(password, { ...KDF_PARAMS, salt, raw: true });
+
+let decryptedKey;
+try {
+  const decipher = crypto.createDecipheriv('aes-256-gcm', kek, nonce);
+  decipher.setAuthTag(authTag);
+  decryptedKey = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+  } catch (err) {
+  // 
+  throw new Error('Contraseña incorrecta o keystore corrupto');
+  }
+
+  // ERROR INTENCIONAL: No limpia 'kek' al finalizar
+  return { 
+    privKey: new Uint8Array(decryptedKey), 
+    pubKey: new Uint8Array(Buffer.from(data.publicKey_b64, 'base64')) 
+  };
+
+}
+
+module.exports = { ensureKeystoresDir, getAccounts, createKeystore, loadPrivateKey }
