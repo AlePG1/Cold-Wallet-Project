@@ -42,4 +42,19 @@ app.whenReady().then(() => {
     try { multiKeyStore.deleteAccount(id); return { success: true, message: 'Cuenta eliminada' }; }
     catch (e) { return { success: false, error: e.message }; }
   });
-});  
+
+  
+  ipcMain.handle('sign-transaction', async (e, { keystoreId, password, to, value, nonce, data }) => {
+    try {
+      const { privKey, pubKey } = await multiKeyStore.loadPrivateKey(keystoreId, password);
+      
+      // error
+      const signedTx = signTransaction({ to, value, nonce, data_hex: data || null }, privKey, pubKey);
+      
+      const ts = new Date().toISOString().replace(/[:.]/g, '-');
+      const p = path.join(OUTBOX_DIR, `tx-${ts}.json`);
+      fs.writeFileSync(p, JSON.stringify(signedTx, null, 2));
+      return { success: true, message: 'Transacción firmada', filename: path.basename(p), tx: signedTx };
+    } catch (e) { return { success: false, error: e.message }; }
+  });
+});
