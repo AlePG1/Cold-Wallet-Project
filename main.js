@@ -25,7 +25,7 @@ app.whenReady().then(() => {
     // Agrega soporte básico macOS
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 
-  // Handlers de Cuentas
+  // NUEVO: Handlers de Cuentas
   ipcMain.handle('get-accounts', async () => {
     try { return { success: true, accounts: multiKeyStore.getAccounts().accounts }; }
     catch (e) { return { success: false, error: e.message }; }
@@ -42,18 +42,4 @@ app.whenReady().then(() => {
     try { multiKeyStore.deleteAccount(id); return { success: true, message: 'Cuenta eliminada' }; }
     catch (e) { return { success: false, error: e.message }; }
   });
-
-  ipcMain.handle('sign-transaction', async (e, { keystoreId, password, to, value, nonce, data }) => {
-    try {
-      const { privKey, pubKey } = await multiKeyStore.loadPrivateKey(keystoreId, password);
-      
-      const signedTx = signTransaction({ to, value, nonce, data_hex: data || null }, privKey, pubKey);
-      
-      const ts = new Date().toISOString().replace(/[:.]/g, '-');
-      const p = path.join(OUTBOX_DIR, `tx-${ts}.json`);
-    
-      fs.writeFileSync(p, JSON.stringify(signedTx, null, 2));
-      return { success: true, message: 'Transacción firmada', filename: path.basename(p), tx: signedTx };
-    } catch (e) { return { success: false, error: e.message }; }
-  });
-});
+});  
