@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs'); // FIX: Importado correctamente
 const multiKeyStore = require('./app/multiKeyStore');
 const OUTBOX_DIR = path.join(__dirname, 'outbox');
 const INBOX_DIR = path.join(__dirname, 'inbox');
@@ -63,4 +64,19 @@ app.whenReady().then(() => {
             return { success: true, message: 'Transacción firmada', filename: path.basename(p), tx: signedTx };
         } catch (e) { return { success: false, error: e.message }; }
     });
+});
+
+// NUEVO: Listar archivos
+ipcMain.handle('list-inbox', async () => {
+    try {
+        const f = fs.readdirSync(INBOX_DIR).filter(x => x.endsWith('.json')).map(x => ({ name: x }));
+        return { success: true, files: f };
+    } catch (e) { return { success: false, error: e.message }; }
+});
+
+ipcMain.handle('list-outbox', async () => {
+    try {
+        const f = fs.readdirSync(OUTBOX_DIR).filter(x => x.endsWith('.json')).map(x => ({ name: x }));
+        return { success: true, files: f };
+    } catch (e) { return { success: false, error: e.message }; }
 });
