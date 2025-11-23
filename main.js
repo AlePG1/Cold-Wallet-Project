@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs'); // FIX: Importado correctamente
 const multiKeyStore = require('./app/multiKeyStore');
+const { deriveAddress } = require('./app/cryptoUtils'); //FIX:Importado
 const OUTBOX_DIR = path.join(__dirname, 'outbox');
 const INBOX_DIR = path.join(__dirname, 'inbox');
 const VERIFIED_DIR = path.join(__dirname, 'verified');
@@ -21,7 +22,7 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
-            preload: path.join(dirname, 'preload.js') // FIX: Agregado
+            preload: path.join(__dirname, 'preload.js') // FIX: Agregado
         }
     });
     win.loadFile('index.html');
@@ -50,6 +51,12 @@ app.whenReady().then(() => {
         catch (e) { return { success: false, error: e.message }; }
     });
 
+    ipcMain.handle('get-address', async (e, { keystoreId, password }) => {
+        try {
+            const { pubKey } = await multiKeyStore.loadPrivateKey(keystoreId, password);
+            return { success: true, pubKey: Buffer.from(pubKey).toString('base64'), address: deriveAddress(pubKey) };
+        } catch (e) { return { success: false, error: e.message }; }
+    });
 
     ipcMain.handle('sign-transaction', async (e, { keystoreId, password, to, value, nonce, data }) => {
         try {
