@@ -3,65 +3,75 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cold Wallet</title>
+  <title>Cold Wallet - Crypto Security</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <header class="header">
       <div class="logo">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <rect width="40" height="40" rx="8" fill="#4F46E5"/>
+          <defs>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#00d9ff;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#7000ff;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          <rect width="40" height="40" rx="8" fill="url(#grad1)"/>
           <path d="M20 10L28 15V25L20 30L12 25V15L20 10Z" stroke="white" stroke-width="2" fill="none"/>
           <circle cx="20" cy="20" r="4" fill="white"/>
         </svg>
-        <h1>Cold Wallet</h1>
+        <h1>Cartera Fría Multi-Cuenta</h1>
       </div>
       <div class="header-info">
-        <span id="wallet-status" class="status-badge">No inicializada</span>
+        <span id="wallet-status" class="status-badge">0 Cuentas</span>
       </div>
     </header>
-    <!-- Main Content -->
+
     <main class="main-content">
-      <!-- Navigation Tabs -->
       <nav class="tabs">
-        <button class="tab active" data-tab="init"> Inicializar</button>
-        <button class="tab" data-tab="address"> Dirección</button>
-        <button class="tab" data-tab="sign"> Firmar</button>
-        <button class="tab" data-tab="verify"> Verificar</button>
-        <button class="tab" data-tab="files"> Archivos</button>
+        <button class="tab active" data-tab="accounts">👥 Cuentas</button>
+        <button class="tab" data-tab="address">📍 Dirección</button>
+        <button class="tab" data-tab="sign">✍️ Firmar</button>
+        <button class="tab" data-tab="verify">✅ Verificar</button>
+        <button class="tab" data-tab="files">📁 Archivos</button>
       </nav>
 
-      <!-- Tab Contents -->
       <div class="tab-content">
-        <!-- INIT TAB -->
-        <div id="init-tab" class="tab-panel active">
+        <!-- ACCOUNTS TAB -->
+        <div id="accounts-tab" class="tab-panel active">
           <div class="card">
-            <h2>Inicializar Billetera</h2>
-            <p class="description">
-              Crea un nuevo almacén de claves cifrado con AES-256-GCM.
-              La clave privada Ed25519 será protegida mediante Argon2id.
-            </p>
+            <h2>Gestión de Cuentas</h2>
+            <p class="description">Crea y administra múltiples cuentas (cada una con su par de claves Ed25519)</p>
             
-            <div id="init-form" class="form">
+            <div class="form">
+              <h3 style="color: #00d9ff;">Crear Nueva Cuenta</h3>
               <div class="form-group">
-                <label for="init-password">Frase de Contraseña</label>
-                <input type="password" id="init-password" placeholder="Mínimo 12 caracteres">
-                <small>Utiliza una contraseña fuerte y única</small>
+                <label for="account-name">Nombre de la Cuenta</label>
+                <input type="text" id="account-name" placeholder="Ej: Cuenta Personal">
               </div>
-              
               <div class="form-group">
-                <label for="init-password-confirm">Confirmar Contraseña</label>
-                <input type="password" id="init-password-confirm" placeholder="Repite la contraseña">
+                <label for="account-password">Contraseña</label>
+                <input type="password" id="account-password" placeholder="Mínimo 12 caracteres">
               </div>
-              
-              <button id="btn-init" class="btn btn-primary">
-                 Crear Almacén de Claves
-              </button>
+              <div class="form-group">
+                <label for="account-password-confirm">Confirmar Contraseña</label>
+                <input type="password" id="account-password-confirm" placeholder="Repite la contraseña">
+              </div>
+              <button id="btn-create-account" class="btn btn-primary">➕ Crear Cuenta</button>
             </div>
 
-            <div id="init-result" class="result hidden"></div>
+            <div id="account-result" class="result hidden"></div>
+
+            <div style="margin-top: 2rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="color: #00d9ff;">Mis Cuentas</h3>
+                <button id="btn-refresh-accounts" class="btn btn-secondary btn-sm">🔄 Actualizar</button>
+              </div>
+              <div id="accounts-list" class="file-list">
+                <p class="empty-state">No hay cuentas creadas</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -69,19 +79,20 @@
         <div id="address-tab" class="tab-panel">
           <div class="card">
             <h2>Consultar Dirección</h2>
-            <p class="description">
-              Visualiza tu clave pública y dirección estilo Ethereum.
-            </p>
+            <p class="description">Visualiza la dirección de una cuenta específica</p>
             
             <div class="form">
               <div class="form-group">
-                <label for="address-password">Frase de Contraseña</label>
-                <input type="password" id="address-password" placeholder="Ingresa tu contraseña">
+                <label for="address-account">Seleccionar Cuenta</label>
+                <select id="address-account" class="form-select">
+                  <option value="">-- Selecciona una cuenta --</option>
+                </select>
               </div>
-              
-              <button id="btn-address" class="btn btn-primary">
-                 Mostrar Dirección
-              </button>
+              <div class="form-group">
+                <label for="address-password">Contraseña</label>
+                <input type="password" id="address-password" placeholder="Contraseña de la cuenta">
+              </div>
+              <button id="btn-address" class="btn btn-primary">📍 Mostrar Dirección</button>
             </div>
 
             <div id="address-result" class="result hidden"></div>
@@ -92,44 +103,40 @@
         <div id="sign-tab" class="tab-panel">
           <div class="card">
             <h2>Firmar Transacción</h2>
-            <p class="description">
-              Crea una transacción firmada que será guardada en la carpeta <code>outbox/</code>.
-            </p>
+            <p class="description">Firma una transacción con una cuenta específica</p>
             
             <div class="form">
               <div class="form-group">
-                <label for="sign-password">Frase de Contraseña</label>
-                <input type="password" id="sign-password" placeholder="Ingresa tu contraseña">
+                <label for="sign-account">Cuenta a Usar</label>
+                <select id="sign-account" class="form-select">
+                  <option value="">-- Selecciona una cuenta --</option>
+                </select>
               </div>
-
+              <div class="form-group">
+                <label for="sign-password">Contraseña</label>
+                <input type="password" id="sign-password" placeholder="Contraseña">
+              </div>
               <div class="form-row">
                 <div class="form-group">
                   <label for="sign-to">Dirección Destino</label>
                   <input type="text" id="sign-to" placeholder="0x...">
                 </div>
-                
                 <div class="form-group">
                   <label for="sign-value">Valor</label>
                   <input type="text" id="sign-value" placeholder="100">
                 </div>
               </div>
-
               <div class="form-row">
                 <div class="form-group">
                   <label for="sign-nonce">Nonce</label>
                   <input type="text" id="sign-nonce" placeholder="0">
-                  <small>Incrementa con cada transacción</small>
                 </div>
-                
                 <div class="form-group">
                   <label for="sign-data">Datos (Opcional)</label>
                   <input type="text" id="sign-data" placeholder="0xaabbcc">
                 </div>
               </div>
-              
-              <button id="btn-sign" class="btn btn-primary">
-                 Firmar Transacción
-              </button>
+              <button id="btn-sign" class="btn btn-primary">✍️ Firmar Transacción</button>
             </div>
 
             <div id="sign-result" class="result hidden"></div>
@@ -140,15 +147,10 @@
         <div id="verify-tab" class="tab-panel">
           <div class="card">
             <h2>Verificar Transacción</h2>
-            <p class="description">
-              Verifica una transacción firmada desde la carpeta <code>inbox/</code>.
-            </p>
+            <p class="description">Verifica transacciones desde <code>inbox/</code></p>
             
             <div class="form">
-              <button id="btn-refresh-inbox" class="btn btn-secondary">
-                 Actualizar Lista
-              </button>
-              
+              <button id="btn-refresh-inbox" class="btn btn-secondary">🔄 Actualizar Lista</button>
               <div id="inbox-list" class="file-list">
                 <p class="empty-state">No hay transacciones en inbox/</p>
               </div>
@@ -162,33 +164,23 @@
         <div id="files-tab" class="tab-panel">
           <div class="card">
             <h2>Gestor de Archivos</h2>
-            <p class="description">
-              Visualiza las transacciones en las diferentes carpetas del sistema.
-            </p>
+            <p class="description">Visualiza transacciones en diferentes carpetas</p>
 
             <div class="files-grid">
-              <!-- Outbox -->
               <div class="file-section">
-                <h3> Outbox (Firmadas)</h3>
-                <button class="btn btn-secondary btn-sm" id="btn-refresh-outbox">🔄</button>
+                <h3>📤 Outbox <button class="btn btn-secondary btn-sm" id="btn-refresh-outbox">🔄</button></h3>
                 <div id="outbox-list" class="file-list">
                   <p class="empty-state">No hay archivos</p>
                 </div>
               </div>
-
-              <!-- Inbox -->
               <div class="file-section">
-                <h3> Inbox (Por verificar)</h3>
-                <button class="btn btn-secondary btn-sm" id="btn-refresh-inbox-files">🔄</button>
+                <h3>📥 Inbox <button class="btn btn-secondary btn-sm" id="btn-refresh-inbox-files">🔄</button></h3>
                 <div id="inbox-list-files" class="file-list">
                   <p class="empty-state">No hay archivos</p>
                 </div>
               </div>
-
-              <!-- Verified -->
               <div class="file-section">
-                <h3> Verified (Verificadas)</h3>
-                <button class="btn btn-secondary btn-sm" id="btn-refresh-verified">🔄</button>
+                <h3>✅ Verified <button class="btn btn-secondary btn-sm" id="btn-refresh-verified">🔄</button></h3>
                 <div id="verified-list" class="file-list">
                   <p class="empty-state">No hay archivos</p>
                 </div>
@@ -199,13 +191,12 @@
       </div>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
-      <p> Cold Wallet | Ed25519 + AES-256-GCM + Argon2id</p>
-      <p class="small">Proyecto Criptografía 2026-1</p>
+      <p>🔒 Cold Wallet | Ed25519 + AES-256-GCM + Argon2id</p>
+      <p class="small">Proyecto Criptográfia 2026-1</p>
     </footer>
   </div>
 
-  
+  <script src="renderer.js"></script>
 </body>
 </html>
