@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cold Wallet - Crypto Security</title>
+<!-- ERROR INTENCIONAL: Faltan los links a CSS y JS -->
+</head>
+<body>
+<div class="container">
+<header class="header">
+<div class="logo">
+<h1>Cartera Fría Multi-Cuenta</h1>
+</div>
+<div class="header-info">
+<span id="wallet-status">0 Cuentas</span>
+</div>
+</header>
+
+<main class="main-content">
+<nav class="tabs">
+<button class="tab active" data-tab="accounts">Cuentas</button>
+<button class="tab" data-tab="address">Dirección</button>
+<button class="tab" data-tab="sign">Firmar</button>
+<button class="tab" data-tab="verify">Verificar</button>
+<button class="tab" data-tab="files">Archivos</button>
+</nav>
+
+<div class="tab-content">
+<!-- ACCOUNTS TAB -->
+<div id="accounts-tab" class="tab-panel active">
+<h2>Gestión de Cuentas</h2>
+<p>Crea y administra múltiples cuentas</p>
+<div class="form">
+<h3>Crear Nueva Cuenta</h3>
+<label for="account-name">Nombre</label>
+<input type="text" id="account-name">
+<label for="account-password">Contraseña</label>
+<input type="password" id="account-password">
+<label for="account-password-confirm">Confirmar</label>
+<input type="password" id="account-password-confirm">
+<button id="btn-create-account">Crear Cuenta</button>
+</div>
+<div id="account-result" class="result hidden"></div>
+<div id="accounts-list">
+<p>No hay cuentas creadas</p>
+</div>
+</div>
+
+<!-- (Otros tabs vacíos por ahora para simular progreso) -->
+<div id="address-tab" class="tab-panel"><h2>Dirección</h2></div>
+<div id="sign-tab" class="tab-panel"><h2>Firmar</h2></div>
+<div id="verify-tab" class="tab-panel"><h2>Verificar</h2></div>
+<div id="files-tab" class="tab-panel"><h2>Archivos</h2></div>
+</div>
+</main>
+
+<footer>
+<p>Proyecto Criptografía 2026-1</p>
+</footer>
+</div>
+</body>
+</html>
