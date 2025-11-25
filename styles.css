@@ -197,3 +197,235 @@ body {
   cursor: pointer;
 }
 
+/* ========================================
+   BOTONES
+   ======================================== */
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+/* Botón primario (acciones principales) */
+.btn-primary {
+  background: linear-gradient(135deg, #00d9ff 0%, #7000ff 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 217, 255, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 217, 255, 0.5);
+}
+
+/* Botón secundario (acciones secundarias) */
+.btn-secondary {
+  background: rgba(30, 30, 63, 0.8);
+  border: 2px solid rgba(0, 217, 255, 0.3);
+  color: #00d9ff;
+}
+
+.btn-secondary:hover {
+  background: rgba(0, 217, 255, 0.1);
+  border-color: #00d9ff;
+}
+
+/* Botón de peligro (acciones destructivas) */
+.btn-danger {
+  background: linear-gradient(135deg, #ff006e 0%, #ff4d00 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 0, 110, 0.3);
+}
+
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 0, 110, 0.5);
+}
+
+/* Botón pequeño */
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* ========================================
+   RESULTADOS Y MENSAJES
+   ======================================== */
+
+.result {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.result.hidden {
+  display: none;
+}
+
+/* Mensaje de éxito */
+.result.success {
+  background: rgba(0, 217, 255, 0.1);
+  border: 2px solid #00d9ff;
+  color: #00d9ff;
+}
+
+/* Mensaje de error */
+.result.error {
+  background: rgba(255, 0, 110, 0.1);
+  border: 2px solid #ff006e;
+  color: #ff6b9d;
+}
+
+.result-item {
+  margin: 0.5rem 0;
+}
+
+/* Bloques de código en resultados */
+.result-item code {
+  display: block;
+  background: rgba(20, 20, 40, 0.8);
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  overflow-x: auto;
+  color: #00d9ff;
+  border: 1px solid rgba(0, 217, 255, 0.2);
+}
+
+/* ========================================
+   LISTAS DE ARCHIVOS Y CUENTAS
+   ======================================== */
+
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Item individual de archivo */
+.file-item {
+  background: rgba(30, 30, 63, 0.6);
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid rgba(0, 217, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.file-item:hover {
+  background: rgba(0, 217, 255, 0.05);
+  border-color: #00d9ff;
+  transform: translateX(5px);
+}
+
+.file-name {
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.file-date {
+  color: #8080a0;
+  font-size: 0.85rem;
+}
+
+/* ========================================
+   TARJETAS DE CUENTA
+   ======================================== */
+
+.account-card {
+  background: rgba(30, 30, 63, 0.6);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 2px solid rgba(0, 217, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.account-card:hover {
+  border-color: #00d9ff;
+  box-shadow: 0 4px 20px rgba(0, 217, 255, 0.2);
+}
+
+.account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 0.5rem;
+}
+
+.account-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #00d9ff;
+}
+
+.account-address {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #b0b0d0;
+  word-break: break-all;
+}
+
+/* ========================================
+   ESTADO VACÍO
+   ======================================== */
+
+.empty-state {
+  text-align: center;
+  color: #6060a0;
+  padding: 2rem;
+}
+
+/* ========================================
+   GRID DE ARCHIVOS (3 COLUMNAS)
+   ======================================== */
+
+.files-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.file-section h3 {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  color: #00d9ff;
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+.footer {
+  background: linear-gradient(135deg, #1e1e3f 0%, #2d2d5f 100%);
+  padding: 1rem;
+  text-align: center;
+  color: #8080a0;
+  border-top: 2px solid #00d9ff;
+}
+
+.footer p.small {
+  color: #6060a0;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+/* ========================================
+   RESPONSIVE - MÓVILES
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* En móviles, las filas de formulario y grid de archivos se apilan verticalmente */
+  .form-row,
+  .files-grid {
+    grid-template-columns: 1fr;
+  }
+}
