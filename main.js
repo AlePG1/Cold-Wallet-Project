@@ -2,9 +2,9 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs'); [cite_start]// FIX: Importado correctamente 
 const multiKeyStore = require('./app/multiKeyStore');
-[cite_start]// FIX COMMIT 7: Import transaction modules 
+// FIX COMMIT 7: Import transaction modules 
 const { signTransaction, verifyTransaction } = require('./app/transactionManager');
-const { deriveAddress } = require('./app/cryptoUtils'); [cite_start]// FIX: Importado 
+const { deriveAddress } = require('./app/cryptoUtils'); // FIX: Importado 
 
 const OUTBOX_DIR = path.join(__dirname, 'outbox');
 const INBOX_DIR = path.join(__dirname, 'inbox');
@@ -14,7 +14,7 @@ const NONCE_TRACKER = path.join(__dirname, 'nonce_tracker.json');
 function ensureDirs() {
   [OUTBOX_DIR, INBOX_DIR, VERIFIED_DIR].forEach(d => { if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true }); });
   if (!fs.existsSync(NONCE_TRACKER)) fs.writeFileSync(NONCE_TRACKER, '{}');
-  [cite_start]// FIX FINAL: Asegurar carpetas de cuentas 
+  // FIX FINAL: Asegurar carpetas de cuentas 
   multiKeyStore.ensureKeystoresDir();
 }
 
@@ -26,19 +26,19 @@ app.whenReady().then(() => {
       webPreferences: { 
           nodeIntegration: false, 
           contextIsolation: true, 
-          [cite_start]preload: path.join(__dirname, 'preload.js') // FIX: Agregado 
+          preload: path.join(__dirname, 'preload.js') // FIX: Agregado 
       }
   });
   w.loadFile('index.html');
   
-  [cite_start]// Agrega soporte básico macOS 
+  // Agrega soporte básico macOS 
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) w.loadFile('index.html'); });
 });
 
-[cite_start]// Manejo de cierre al final del archivo 
+// Manejo de cierre al final del archivo 
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 
-[cite_start]//  Handlers de Cuentas
+//  Handlers de Cuentas
 ipcMain.handle('get-accounts', async () => {
   try { return { success: true, accounts: multiKeyStore.getAccounts().accounts }; }
   catch (e) { return { success: false, error: e.message }; }
@@ -56,7 +56,7 @@ ipcMain.handle('delete-account', async (e, id) => {
   catch (e) { return { success: false, error: e.message }; }
 });
 
-[cite_start]// Handler get-address 
+// Handler get-address 
 ipcMain.handle('get-address', async (e, { keystoreId, password }) => {
   try {
     const { pubKey } = await multiKeyStore.loadPrivateKey(keystoreId, password);
@@ -75,7 +75,7 @@ ipcMain.handle('sign-transaction', async (e, { keystoreId, password, to, value, 
   } catch (e) { return { success: false, error: e.message }; }
 });
 
-[cite_start]//  Listar archivos 
+//  Listar archivos 
 ipcMain.handle('list-inbox', async () => {
   try {
     const f = fs.readdirSync(INBOX_DIR).filter(x => x.endsWith('.json')).map(x => ({ name: x, path: path.join(INBOX_DIR, x), stats: fs.statSync(path.join(INBOX_DIR, x)) }));
@@ -83,7 +83,7 @@ ipcMain.handle('list-inbox', async () => {
   } catch (e) { return { success: false, error: e.message }; }
 });
 
-[cite_start]// Handler de Verificación 
+// Handler de Verificación 
 ipcMain.handle('verify-transaction', async (e, filename) => {
   try {
     const p = path.join(INBOX_DIR, filename);
@@ -110,7 +110,7 @@ ipcMain.handle('list-outbox', async () => {
   } catch (e) { return { success: false, error: e.message }; }
 });
 
-[cite_start]// Agrega list-verified que faltaba 
+// Agrega list-verified que faltaba 
 ipcMain.handle('list-verified', async () => {
   try {
     const f = fs.readdirSync(VERIFIED_DIR).filter(x => x.endsWith('.json')).map(x => ({ name: x, path: path.join(VERIFIED_DIR, x), stats: fs.statSync(path.join(VERIFIED_DIR, x)) }));
