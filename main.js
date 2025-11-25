@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const fs = require('fs'); [cite_start]// FIX: Importado correctamente 
+const fs = require('fs'); // FIX: Importado correctamente 
 const multiKeyStore = require('./app/multiKeyStore');
 // FIX COMMIT 7: Import transaction modules 
 const { signTransaction, verifyTransaction } = require('./app/transactionManager');
