@@ -128,7 +128,7 @@ ipcMain.handle('verify-transaction', async (e, filename) => {
 
 ipcMain.handle('list-verified', async () => {
     try {
-        const f = fs.readdirSync(VERIFIED_DIR).filter(x => x.endsWith('.json')).map(x => ({ name: x }));
+        const f = fs.readdirSync(VERIFIED_DIR).filter(x => x.endsWith('.json')).map(x => ({ name: x, path: path.join(VERIFIED_DIR, x), stats: fs.statSync(path.join(VERIFIED_DIR, x)) }));
         return { success: true, files: f };
     } catch (e) {
         return { success: false, error: e.message };
