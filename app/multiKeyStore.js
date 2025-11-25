@@ -7,22 +7,23 @@ const { deriveAddress } = require('./cryptoUtils');
 
 const KEYSTORES_DIR = path.join(__dirname, '../keystores');
 const ACCOUNTS_FILE = path.join(__dirname, '../accounts.json');
-const KDF_PARAMS = { timeCost: 3, memoryCost: 65536, parallelism: 4, type: argon2.argon2id, hashLength: 32 }
+const KDF_PARAMS = { timeCost: 3, memoryCost: 65536, parallelism: 4, type: argon2.argon2id, hashLength: 32 };
 
 function ensureKeystoresDir() {
   if (!fs.existsSync(KEYSTORES_DIR)) fs.mkdirSync(KEYSTORES_DIR, { recursive: true });
-  if (!fs.existsSync(ACCOUNTS_FILE)) fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify({accounts: []}));
+  if (!fs.existsSync(ACCOUNTS_FILE)) fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify({ accounts: [] }));
 }
 
 function getAccounts() {
-ensureKeystoresDir();
-return JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
+  ensureKeystoresDir();
+  return JSON.parse(fs.readFileSync(ACCOUNTS_FILE, 'utf8'));
 }
 
 async function createKeystore(accountName, password) {
   ensureKeystoresDir();
   const accounts = getAccounts();
-  if(accounts.accounts.find(a =>a.name === accountName)) throw new Error('Ya existe una cuenta con ese nombre');
+  if (accounts.accounts.find(a => a.name === accountName)) throw new Error('Ya existe una cuenta con ese nombre');
+  
   const keyPair = nacl.sign.keyPair();
   const salt = crypto.randomBytes(16);
   const nonce = crypto.randomBytes(12);
@@ -46,7 +47,6 @@ async function createKeystore(accountName, password) {
   };
   
   fs.writeFileSync(path.join(KEYSTORES_DIR, `${keystoreId}.json`), JSON.stringify(keystoreData, null, 2));
-  
   accounts.accounts.push({
     id: keystoreId,
     name: accountName,
@@ -54,42 +54,32 @@ async function createKeystore(accountName, password) {
     pubkey_b64: keystoreData.pubkey_b64,
     created: keystoreData.created,
   });
-  
   fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accounts, null, 2));
   kek.fill(0);
   keyPair.secretKey.fill(0);
-  
   return { address: accounts.accounts[accounts.accounts.length - 1].address, pubKey: keystoreData.pubkey_b64 };
 }
 
 async function loadPrivateKey(keystoreId, password) {
-const keystorePath = path.join(KEYSTORES_DIR, `${keystoreId}.json`);
-if (!fs.existsSync(keystorePath)) throw new Error('Keystore no encontrado');
-
-const data = JSON.parse(fs.readFileSync(keystorePath, 'utf8'));
-const salt = Buffer.from(data.kdf_params.salt_b64, 'base64');
-const nonce = Buffer.from(data.cipher_params.nonce_b64, 'base64');
-const ciphertext = Buffer.from(data.ciphertext_b64, 'base64');
-const authTag = Buffer.from(data.tag_b64, 'base64');
-
-const kek = await argon2.hash(password, { ...KDF_PARAMS, salt, raw: true });
-
-let decryptedKey;
-try {
-  const decipher = crypto.createDecipheriv('aes-256-gcm', kek, nonce);
-  decipher.setAuthTag(authTag);
-  decryptedKey = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+  const keystorePath = path.join(KEYSTORES_DIR, `${keystoreId}.json`);
+  if (!fs.existsSync(keystorePath)) throw new Error('Keystore no encontrado');
+  const data = JSON.parse(fs.readFileSync(keystorePath, 'utf8'));
+  const salt = Buffer.from(data.kdf_params.salt_b64, 'base64');
+  const nonce = Buffer.from(data.cipher_params.nonce_b64, 'base64');
+  const ciphertext = Buffer.from(data.ciphertext_b64, 'base64');
+  const authTag = Buffer.from(data.tag_b64, 'base64');
+  const kek = await argon2.hash(password, { ...KDF_PARAMS, salt, raw: true });
+  let decryptedKey;
+  try {
+    const decipher = crypto.createDecipheriv('aes-256-gcm', kek, nonce);
+    decipher.setAuthTag(authTag);
+    decryptedKey = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
   } catch (err) {
-  kek.fill(0);
-  throw new Error('Contraseña incorrecta o keystore corrupto');
+    kek.fill(0);
+    throw new Error('Contraseña incorrecta o keystore corrupto');
   }
   kek.fill(0);
-
-  return { 
-    privKey: new Uint8Array(decryptedKey), 
-    pubKey: new Uint8Array(Buffer.from(data.pubkey_b64, 'base64')) 
-  };
-
+  return { privKey: new Uint8Array(decryptedKey), pubKey: new Uint8Array(Buffer.from(data.pubkey_b64, 'base64')) };
 }
 
 function deleteAccount(keystoreId) {
@@ -100,4 +90,4 @@ function deleteAccount(keystoreId) {
   fs.writeFileSync(ACCOUNTS_FILE, JSON.stringify(accounts, null, 2));
 }
 
-module.exports = { ensureKeystoresDir, getAccounts, createKeystore, loadPrivateKey, deleteAccount }
+module.exports = { ensureKeystoresDir, getAccounts, createKeystore, loadPrivateKey, deleteAccount };
