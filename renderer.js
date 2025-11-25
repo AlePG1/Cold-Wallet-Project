@@ -18,6 +18,22 @@ async function loadAccounts() {
   }
 }
 
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadAccounts();
+  setupTabs();
+  setupListeners();
+});
+
+async function loadAccounts() {
+  const res = await window.walletAPI.getAccounts();
+  if (res.success) {
+    accounts = res.accounts;
+    updateAccountsUI();
+    updateAccountSelects(); // Actualiza los dropdowns
+    document.getElementById('wallet-status').textContent = `${accounts.length} Cuenta${accounts.length > 1 ? 's' : ''}`;
+  }
+}
+
 // Renderiza la lista de cuentas en la UI
 function updateAccountsUI() {
   const div = document.getElementById('accounts-list');
@@ -54,9 +70,21 @@ function setupTabs() {
   });
 }
 
+function updateAccountSelects() {
+    const selects = ['address-account', 'sign-account'];
+    selects.forEach(id => {
+        const sel = document.getElementById(id);
+        sel.innerHTML = '<option value="">-- Selecciona una cuenta --</option>' +
+            accounts.map(a => `<option value="${a.id}">${a.name} (${a.address.slice(0, 10)}...)</option>`).join('');
+    });
+}
+
 // Configura los listeners de eventos básicos
 function setupListeners() {
   document.getElementById('btn-create-account').addEventListener('click', createAccount);
+  document.getElementById('btn-refresh-accounts').addEventListener('click', loadAccounts);
+  document.getElementById('btn-address').addEventListener('click', getAddress); // Listener para obtener dirección
+  document.getElementById('btn-sign').addEventListener('click', signTx); // Listener para firmar
 }
 
 // Maneja la creación de una nueva cuenta
@@ -87,4 +115,71 @@ function show(el, txt, type, html = false) {
   el.classList.remove('hidden', 'success', 'error');
   el.classList.add(type);
   html ? el.innerHTML = txt : el.textContent = txt;
+}
+
+// NUEVO: Obtiene y muestra la dirección completa y clave pública
+async function getAddress() {
+    const keystoreId = document.getElementById('address-account').value;
+    const pass = document.getElementById('address-password').value;
+    const div = document.getElementById('address-result');
+
+    if (!keystoreId || !pass) {
+        show(div, 'Selecciona cuenta e ingresa contraseña', 'error');
+        return;
+    }
+
+    const res = await window.walletAPI.getAddress({
+        keystoreId,
+        password: pass
+    });
+
+    if (res.success) {
+        show(div, `<h3>✓ Dirección</h3><div class="result-item"><strong>Clave Pública:</strong> ${res.publicKey}</div>`, 'success', true);
+        document.getElementById('address-password').value = '';
+    } else {
+        show(div, res.error, 'error');
+    }
+}
+
+// NUEVO: Lógica para firmar una transacción
+async function signTx() {
+    const keystoreId = document.getElementById('sign-account').value;
+    const pass = document.getElementById('sign-password').value;
+    const to = document.getElementById('sign-to').value;
+    const value = document.getElementById('sign-value').value;
+    const nonce = document.getElementById('sign-nonce').value;
+    const data = document.getElementById('sign-data').value;
+    const div = document.getElementById('sign-result');
+
+    if (!keystoreId || !pass || !to || !value || !nonce) {
+        show(div, 'Completa campos obligatorios', 'error');
+        return;
+    }
+    if (!to.startsWith('0x') || to.length !== 42) {
+        show(div, 'Dirección inválida', 'error');
+        return;
+    }
+
+    const res = await window.walletAPI.signTransaction({
+        keystoreId,
+        password: pass,
+        to,
+        value,
+        nonce,
+        data
+    });
+
+    if (res.success) {
+        show(div, `<h3>✓ Firmada</h3><div class="result-item"><strong>Archivo:</strong> <code>${res.signedTx || 'Generado'}</code></div>`, 'success', true);
+        // Limpieza de campos de firma
+        ['sign-password', 'sign-to', 'sign-value', 'sign-nonce', 'sign-data'].forEach(id => document.getElementById(id).value = '');
+    } else {
+        show(div, res.error, 'error');
+    }
+}
+
+function show(el, txt, type, html = false) {
+    el.classList.remove('hidden', 'success', 'error');
+    el.classList.add(type);
+    html ? el.innerHTML = txt : el.textContent = txt;
 }
