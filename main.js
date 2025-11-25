@@ -13,6 +13,7 @@ function ensureDirs() {
     [OUTBOX_DIR, INBOX_DIR, VERIFIED_DIR].forEach(d => {
         if (!fs.existsSync(d)) fs.mkdirSync(d);
         if (!fs.existsSync(NONCE_TRACKER)) fs.writeFileSync(NONCE_TRACKER, '{}');
+        multiKeyStore.ensureKeystoresDir();
     });
 }
 
@@ -120,6 +121,15 @@ ipcMain.handle('verify-transaction', async (e, filename) => {
         } else {
             return { success: false, error: `Verificación fallida: ${res.reason}` };
         }
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
+});
+
+ipcMain.handle('list-verified', async () => {
+    try {
+        const f = fs.readdirSync(VERIFIED_DIR).filter(x => x.endsWith('.json')).map(x => ({ name: x }));
+        return { success: true, files: f };
     } catch (e) {
         return { success: false, error: e.message };
     }
