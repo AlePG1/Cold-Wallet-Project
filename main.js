@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs'); // FIX: Importado correctamente
 const multiKeyStore = require('./app/multiKeyStore');
 const { deriveAddress } = require('./app/cryptoUtils'); //FIX:Importado
+const { signTransaction, verifyTransaction } = require('./app/transactionManager');
 const OUTBOX_DIR = path.join(__dirname, 'outbox');
 const INBOX_DIR = path.join(__dirname, 'inbox');
 const VERIFIED_DIR = path.join(__dirname, 'verified');
@@ -86,4 +87,36 @@ ipcMain.handle('list-outbox', async () => {
         const f = fs.readdirSync(OUTBOX_DIR).filter(x => x.endsWith('.json')).map(x => ({ name: x }));
         return { success: true, files: f };
     } catch (e) { return { success: false, error: e.message }; }
+});
+
+ipcMain.handle('verify-transaction', async (e, filename) => {
+    try {
+        const p = path.join(INBOX_DIR, filename);
+        if (!fs.existsSync(p)) throw new Error('Archivo no existe');
+        
+        const signedTx = JSON.parse(fs.readFileSync(p, 'utf8'));
+        
+        // Carga nonces 
+        let nonces = {};
+        if (fs.existsSync(NONCE_TRACKER)) {
+             try { nonces = JSON.parse(fs.readFileSync(NONCE_TRACKER, 'utf8')); } catch(err) { nonces = {}; }
+        }
+
+        const res = verifyTransaction(signedTx, nonces);
+
+        if (res.valid) {
+            const s = signedTx.tx.from;
+            if (!nonces[s]) nonces[s] = [];
+            nonces[s].push(parseInt(signedTx.tx.nonce, 10));
+            
+            fs.writeFileSync(NONCE_TRACKER, JSON.stringify(nonces, null, 2));
+            fs.renameSync(p, path.join(VERIFIED_DIR, path.basename(p)));
+            
+            return { success: true, message: 'Verificación exitosa', tx: signedTx.tx };
+        } else {
+            return { success: false, error: `Verificación fallida: ${res.reason}` };
+        }
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
 });
