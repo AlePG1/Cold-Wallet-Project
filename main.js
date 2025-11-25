@@ -34,6 +34,9 @@ app.whenReady().then(() => {
     createWindow();
     // Agrega soporte básico macOS
     app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+    app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit();
+});
 
     // NUEVO: Handlers de Cuentas
     ipcMain.handle('get-accounts', async () => {
@@ -73,6 +76,7 @@ app.whenReady().then(() => {
         } catch (e) { return { success: false, error: e.message }; }
     });
 });
+
 
 // NUEVO: Listar archivos
 ipcMain.handle('list-inbox', async () => {
