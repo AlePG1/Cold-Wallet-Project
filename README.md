@@ -498,21 +498,8 @@ Cold-Wallet-Project/
 
 ---
 
-## 📞 Soporte
-
-Si encuentras problemas no cubiertos aquí:
-
-1. Revisa la sección **"Solución de Problemas Comunes"**
-2. Verifica que Node.js ≥18.0 esté instalado: `node --version`
-3. Asegúrate de tener las herramientas de compilación instaladas
-4. Consulta el repositorio: [https://github.com/AlePG1/Cold-Wallet-Project](https://github.com/AlePG1/Cold-Wallet-Project)
-
----
-
 ## 📄 Licencia
 
 Este proyecto es un trabajo académico para el curso de Criptografía 2026-1, UNAM Facultad de Ingeniería.
 
 ---
-
-**✅ ¡Listo! Ahora tienes todo lo necesario para ejecutar el proyecto en cualquier sistema operativo.**
