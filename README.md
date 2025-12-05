@@ -1,4 +1,4 @@
-# 🥶 Cold Crypto Wallet Project (Cryptography 2026-1)
+# 🥶 Cold Wallet Project (Proyecto Criptografía FI UNAM)
 
 ## 🌟 Introducción
 
