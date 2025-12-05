@@ -1,9 +1,9 @@
 # 🥶 Cold Wallet Project (Proyecto Criptografía FI UNAM)
 ## Equipo
-García González Alejandro 
-Gómez Maciel Viridiana
-Pérez del Angel Joaquín Eduardo
-Romero Pizano Christian Gustavo
+* **García González Alejandro** 
+* **Gómez Maciel Viridiana**
+* **Pérez del Angel Joaquín Eduardo**
+* **Romero Pizano Christian Gustavo**
 
 ## 🌟 Introducción
 
