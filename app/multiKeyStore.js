@@ -33,6 +33,7 @@ async function createKeystore(accountName, password) {
   const authTag = cipher.getAuthTag();
   const keystoreId = crypto.randomBytes(16).toString('hex');
   
+  // Crear objeto keystore SIN checksum primero
   const keystoreData = {
     id: keystoreId,
     kdf: 'Argon2id',
@@ -45,6 +46,10 @@ async function createKeystore(accountName, password) {
     scheme: 'Ed25519',
     created: new Date().toISOString(),
   };
+  
+  // 🔹 NUEVO: Calcular checksum SHA-256 del contenido
+  const checksum = crypto.createHash('sha256').update(JSON.stringify(keystoreData)).digest('hex');
+  keystoreData.checksum = checksum;
   
   fs.writeFileSync(path.join(KEYSTORES_DIR, `${keystoreId}.json`), JSON.stringify(keystoreData, null, 2));
   accounts.accounts.push({
@@ -63,7 +68,17 @@ async function createKeystore(accountName, password) {
 async function loadPrivateKey(keystoreId, password) {
   const keystorePath = path.join(KEYSTORES_DIR, `${keystoreId}.json`);
   if (!fs.existsSync(keystorePath)) throw new Error('Keystore no encontrado');
+  
   const data = JSON.parse(fs.readFileSync(keystorePath, 'utf8'));
+  
+  // 🔹 NUEVO: Verificar checksum antes de descifrar
+  if (!data.checksum) throw new Error('Keystore sin checksum: formato inválido');
+  
+  const { checksum, ...withoutChecksum } = data;
+  const expectedChecksum = crypto.createHash('sha256').update(JSON.stringify(withoutChecksum)).digest('hex');
+  
+  if (checksum !== expectedChecksum) throw new Error('Checksum inválido: keystore alterado o corrupto');
+  
   const salt = Buffer.from(data.kdf_params.salt_b64, 'base64');
   const nonce = Buffer.from(data.cipher_params.nonce_b64, 'base64');
   const ciphertext = Buffer.from(data.ciphertext_b64, 'base64');

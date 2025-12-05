@@ -178,4 +178,25 @@ describe('multiKeyStore - Create/Load Keystore', () => {
       multiKeyStore.loadPrivateKey(fakeKeystoreId, password)
     ).rejects.toThrow('Keystore no encontrado');
   });
+
+  test('debería detectar keystore con checksum alterado', async () => {
+    const accountName = 'Checksum Test';
+    const password = 'test_password_123456';
+    
+    await multiKeyStore.createKeystore(accountName, password);
+    const accounts = multiKeyStore.getAccounts();
+    const keystoreId = accounts.accounts.find(a => a.name === accountName).id;
+    const keystorePath = path.join(__dirname, '../keystores', `${keystoreId}.json`);
+    
+    // Leer y modificar el checksum manualmente
+    const keystoreData = JSON.parse(fs.readFileSync(keystorePath, 'utf8'));
+    keystoreData.checksum = 'CHECKSUM_INVALIDO_123456';
+    fs.writeFileSync(keystorePath, JSON.stringify(keystoreData, null, 2));
+  
+    // Intentar cargar debe fallar
+    await expect(
+      multiKeyStore.loadPrivateKey(keystoreId, password)
+    ).rejects.toThrow('Checksum inválido');
+  });
+  
 });
